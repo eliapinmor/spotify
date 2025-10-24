@@ -1,0 +1,32 @@
+[
+        {
+            "id": 1,
+            "titulo": "Cascade Breathe",
+            "artista": "NverAvetyanMusic",
+            "src": "music/cascade-breathe-future-garage-412839.mp3",
+            "album": "Ambient Vibes",
+            "duracion": "2:18",
+            "color": "D089D8",
+            "cover": "../covers/1.webp"
+        },
+        {
+            "id": 2,
+            "titulo": "Deep Abstract Ambient",
+            "artista": "umbrella",
+            "src": "music/deep-abstract-ambient_snowcap-401656.mp3",
+            "album": "Chillout Sessions",
+            "duracion": "1:38",
+            "color": "89D8B0",
+            "cover": "../covers/2.webp"
+        },
+        {
+            "id": 3,
+            "titulo": "The Last Point",
+            "artista": "raspberrymusic",
+            "src": "music/the-last-point-beat-electronic-digital-394291.mp3",
+            "album": "Peaceful Piano",
+            "duracion": "2:05",
+            "color": "D8A089",
+            "cover": "../covers/3.webp"
+        }
+]

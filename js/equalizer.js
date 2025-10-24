@@ -13,26 +13,65 @@ let dataArray;
 let canvas = document.getElementById('equalizer');
 let ctx = canvas.getContext('2d');
 
+let songs = [];
+
 
 //Loading Songs
 const loadSongs = async () => {
-    let response = await fetch('./scripts/songsData.json')
+    let response = await fetch('../json/songsData.json')
     songs = await response.json();
-    howler = new Howl({
-        src: [songs[i].src],
-        volume: songVolume
+
+    const songList = document.getElementById('song-list');
+    songList.innerHTML = '';
+
+    // howler = new Howl({
+    //     src: [songs[i].src],
+    //     volume: songVolume
+    // });
+    
+
+    songs.forEach((song, index) => {
+        const songItem = document.createElement('div');
+        songItem.textContent = `${song.titulo} - ${song.artista}`;
+        songItem.addEventListener('click', () => playSong(index));
+        songList.appendChild(songItem);
     });
 
     //Falta el tratamiento de las propiedades de la canción y toda la creación de la radio. Falta la creación y gestión de la lista de reproducción
 
     //Equilizer
-    analyser = Howler.ctx.createAnalyser();    //Proporciona acceso a la frecuencia y los datos de tiempo del audio que está siendo reproducido. 
-    bufferLength = analyser.frequencyBinCount; //Indica el número de muestras de datos que se obtendrán del audio.
-    dataArray = new Uint8Array(bufferLength);
-    loadEqualizer();
-    animateEqualizer();
+    //  analyser = Howler.ctx.createAnalyser();    //Proporciona acceso a la frecuencia y los datos de tiempo del audio que está siendo reproducido. 
+    //  bufferLength = analyser.frequencyBinCount; //Indica el número de muestras de datos que se obtendrán del audio.
+    //  dataArray = new Uint8Array(bufferLength);
+    //  loadEqualizer();
+    //  animateEqualizer();
 }
 
+
+function playSong(index){
+    if(howler){
+        howler.stop();
+    }
+
+    const song = songs[index];
+    currentSongIndex = index;
+
+    howler = new Howl({
+        src: [song.src],
+        volume: songVolume,
+        onplay: showCurrentSong(song)
+    });
+}
+
+function showCurrentSong(song){
+    const cover = document.querySelector('.song img');
+    const artistName = document.getElementById('artist-name');
+    const songName = document.getElementById('song-name');
+
+    cover.src = song.cover;
+    artistName.textContent = song.artista;
+    songName.textContent = song.titulo;
+}
 
 
 

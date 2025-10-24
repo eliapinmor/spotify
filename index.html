@@ -5,9 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spotify</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
     <script src="js/equalizer.js" defer></script>
 </head>
 <body>
-    <main></main>
+    <main>
+        <section class="left" style="background-color: red;">
+            <div class="song-upper">
+                <div class="volume"></div>
+                <div class="song">
+                    <img src="">
+                </div>
+            </div>
+           <div class="song-bottom">
+            <div class="artist-info">
+                <p id="artist-name"></p>
+                <p id="song-name"></p>
+            </div>
+            <div class="controls"></div>
+           </div>
+        </section>
+        <section class="right" style="background-color: blue;">
+            <div id="song-list"></div>
+            <div class="equalizer">
+                <canvas id="equalizer"  width="600" height="200"></canvas>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
