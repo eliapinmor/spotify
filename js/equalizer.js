@@ -14,6 +14,7 @@ let canvas = document.getElementById('equalizer');
 let ctx = canvas.getContext('2d');
 
 let songs = [];
+let currentSongIndex = null;
 
 
 //Loading Songs
@@ -73,7 +74,27 @@ function showCurrentSong(song){
     songName.textContent = song.titulo;
 }
 
+const pause = document.getElementById('pause');
+const nextSong = document.getElementById('next-song');
+const prevSong = document.getElementById('prev-song');
 
+pause.addEventListener("click", function(){
+    playSong(index);
+})
+
+
+nextSong.addEventListener("click", () => {
+    if(currentSongIndex === null) return;
+    const nextIndex = (currentSongIndex + 1) % songs.length;
+    playSong(nextIndex);
+});
+
+
+prevSong.addEventListener("click", () => {
+    if(currentSongIndex === null) return;
+    const prevIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+    playSong(prevIndex);
+});
 
 
 function loadEqualizer() {

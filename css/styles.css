@@ -23,3 +23,11 @@ main{
     background-color: green;
     margin-right: 10px;
 }
+
+.song-upper{
+    display: flex;
+}
+
+.controls-buttons{
+    display: flex;
+}
