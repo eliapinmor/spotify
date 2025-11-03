@@ -31,7 +31,7 @@ const loadSongs = async () => {
     //     src: [songs[i].src],
     //     volume: songVolume
     // });
-    
+
 
     songs.forEach((song, index) => {
         const songItem = document.createElement('div');
@@ -43,15 +43,15 @@ const loadSongs = async () => {
     //Falta el tratamiento de las propiedades de la canción y toda la creación de la radio. Falta la creación y gestión de la lista de reproducción
 
     //Equilizer
-    //  analyser = Howler.ctx.createAnalyser();    //Proporciona acceso a la frecuencia y los datos de tiempo del audio que está siendo reproducido. 
-    //  bufferLength = analyser.frequencyBinCount; //Indica el número de muestras de datos que se obtendrán del audio.
-    //  dataArray = new Uint8Array(bufferLength);
-    //  loadEqualizer();
-    //  animateEqualizer();
+    // analyser = Howler.ctx.createAnalyser();    //Proporciona acceso a la frecuencia y los datos de tiempo del audio que está siendo reproducido. 
+    // bufferLength = analyser.frequencyBinCount; //Indica el número de muestras de datos que se obtendrán del audio.
+    // dataArray = new Uint8Array(bufferLength);
+    // loadEqualizer();
+    // animateEqualizer();
 }
 
-const loadRadios = async () =>{
-let response = await fetch('../json/radio.json')
+const loadRadios = async () => {
+    let response = await fetch('../json/radio.json')
     radios = await response.json();
 
     const radioList = document.getElementById('radio-list');
@@ -61,7 +61,7 @@ let response = await fetch('../json/radio.json')
     //     src: [songs[i].src],
     //     volume: songVolume
     // });
-    
+
 
     radios.forEach((radio, index) => {
         const radioItem = document.createElement('div');
@@ -72,8 +72,15 @@ let response = await fetch('../json/radio.json')
 }
 
 
-function playSong(index){
-    if(howler){
+function playSong(index) {
+    if (currentRadio) {
+        currentRadio.stop();
+        currentRadio.unload();
+        currentRadio = null;
+        currentRadioIndex = null;
+    }
+
+    if (howler) {
         howler.stop();
     }
 
@@ -83,14 +90,17 @@ function playSong(index){
     howler = new Howl({
         src: [song.src],
         volume: songVolume,
-        onplay: () => showCurrentSong(song)
+        onplay: () => {
+            showCurrentSong(song);
+            updateProgressBar();
+        }
     });
 
     howler.play();
 }
 
-function playRadio(index){
-if (howler) {
+function playRadio(index) {
+    if (howler) {
         howler.stop();
     }
     console.log(currentRadio);
@@ -110,7 +120,7 @@ if (howler) {
     currentRadio.play();
 }
 
-function showCurrentSong(song){
+function showCurrentSong(song) {
     const cover = document.querySelector('.song img');
     const artistName = document.getElementById('artist-name');
     const songName = document.getElementById('song-name');
@@ -120,7 +130,7 @@ function showCurrentSong(song){
     songName.textContent = song.titulo;
 }
 
-function showCurrentRadio(radio){
+function showCurrentRadio(radio) {
     const cover = document.querySelector('.song img');
     const radioName = document.getElementById('artist-name');
     const songName = document.getElementById('song-name');
@@ -142,7 +152,7 @@ function getActiveAudio() {
     return null;
 }
 
-pause.addEventListener("click", function() {
+pause.addEventListener("click", function () {
     const active = getActiveAudio();
 
     if (!active) {
@@ -164,7 +174,7 @@ pause.addEventListener("click", function() {
 
 nextSong.addEventListener("click", () => {
     if (currentRadio) {
-        const nextIndex = (currentRadioIndex + 1) % songs.length;
+        const nextIndex = (currentRadioIndex + 1) % radios.length;
         playRadio(nextIndex);
     } else if (currentSongIndex !== null) {
         const nextIndex = (currentSongIndex + 1) % songs.length;
@@ -175,7 +185,7 @@ nextSong.addEventListener("click", () => {
 
 prevSong.addEventListener("click", () => {
     if (currentRadio) {
-        const prevIndex = (radios.findIndex(r => r === currentRadio._src[0]) - 1 + radios.length) % radios.length;
+        const prevIndex = (currentRadioIndex - 1 + radios.length) % radios.length;
         playRadio(prevIndex);
     } else if (currentSongIndex !== null) {
         const prevIndex = (currentSongIndex - 1 + songs.length) % songs.length;
@@ -190,16 +200,19 @@ const totalTimeHTML = document.getElementById('total-time');
 
 
 function updateProgressBar() {
-    if (!howler.playing()) return;
+    if (!howler || !howler.playing()) return;
 
-    const currentTime = howler.seek();
-    const duration = howler.duration();
+    const currentTime = howler.seek() || 0;
+    const duration = howler.duration() || 0;
 
-    progressBar.value = (currentTime / duration) * 100;
-
+    if (duration > 0) {
+        progressBar.value = (currentTime / duration) * 100;
+    }
 
     currentTimeHTML.textContent = formatTime(currentTime);
     totalTimeHTML.textContent = formatTime(duration);
+
+    requestAnimationFrame(updateProgressBar);
 }
 
 progressBar.addEventListener('input', () => {
@@ -207,6 +220,43 @@ progressBar.addEventListener('input', () => {
     const newTime = (progressBar.value / 100) * howler.duration();
     howler.seek(newTime);
 });
+
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60) || 0;
+    const secs = Math.floor(seconds % 60) || 0;
+    return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+}
+
+
+const volumeBar = document.getElementById('volume');
+
+volumeBar.addEventListener('input', () => {
+    console.log('1:' + songVolume);
+    songVolume = parseFloat(volumeBar.value/100);
+
+    // Cambiar volumen global de Howler (afecta a canciones y radios)
+    Howler.volume(songVolume);
+
+    // Si hay una canción o radio activa, también se aplica directamente
+    if (howler) howler.volume(songVolume);
+    if (currentRadio) currentRadio.volume(songVolume);
+    console.log('2:' + songVolume);
+});
+
+function startEqualizer() {
+    if (!Howler.ctx) {
+        setTimeout(startEqualizer, 500); // Reintenta cada medio segundo
+        return;
+    }
+
+    if (!analyser) {
+        analyser = Howler.ctx.createAnalyser();    //Proporciona acceso a la frecuencia y los datos de tiempo del audio que está siendo reproducido. 
+        bufferLength = analyser.frequencyBinCount; //Indica el número de muestras de datos que se obtendrán del audio.
+        dataArray = new Uint8Array(bufferLength);
+        loadEqualizer();
+        animateEqualizer();
+    }
+}
 
 
 function loadEqualizer() {
@@ -256,3 +306,4 @@ function animateEqualizer() {
 // On Load
 loadSongs();
 loadRadios();
+startEqualizer();

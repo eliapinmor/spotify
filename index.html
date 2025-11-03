@@ -12,15 +12,17 @@
 
 <body>
     <main>
-        <section class="left" style="background-color: red;">
+        <section class="left">
             <div class="song-upper">
-                <div class="volume"></div>
+                <div class="volume-container">
+                    <input type="range" id="volume">
+                </div>
                 <div class="song">
-                    <img src="">
+                    <img src="covers/default.avif">
 
                 </div>
             </div>
-            <div class="song-bottom" style="background-color: rgb(103, 179, 88);">
+            <div class="song-bottom">
                 <div class="artist-info">
                     <p id="artist-name"></p>
                     <p id="song-name"></p>
@@ -39,10 +41,16 @@
                 </div>
             </div>
         </section>
-        <section class="right" style="background-color: blue;">
+        <section class="right">
             <div class="content-selector">
-                <div id="song-list"></div>
-                <div id="radio-list"></div>
+                <div>
+                    <h2>Lista de canciones</h2>
+                    <div id="song-list"></div>
+                </div>
+                <div>
+                    <h2>Lista de radios</h2>
+                    <div id="radio-list"></div>
+                </div>
             </div>
             <div class="equalizer">
                 <canvas id="equalizer" width="600" height="200"></canvas>

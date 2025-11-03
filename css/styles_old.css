@@ -1,0 +1,38 @@
+body{
+    margin: 0;
+}
+
+.left{
+    background-color: red;
+    width: 70%;
+}
+
+.right{
+    background-color: blue;
+    width: 30%;
+}
+
+main{
+    display: flex;
+    height: 100vh;
+}
+
+.volume-container{
+    width: 20px;
+    height: 100px;
+    background-color: green;
+    margin-right: 10px;
+}
+
+#volume{
+    transform: rotateZ(270deg);
+}
+
+.song-upper{
+    display: flex;
+}
+
+.controls-buttons{
+    display: flex;
+}
+
