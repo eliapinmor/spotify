@@ -15,7 +15,8 @@ let ctx = canvas.getContext('2d');
 
 let songs = [];
 let currentSongIndex = null;
-
+let radios = [];
+let currentRadio = null;
 
 //Loading Songs
 const loadSongs = async () => {
@@ -48,6 +49,27 @@ const loadSongs = async () => {
     //  animateEqualizer();
 }
 
+const loadRadios = async () =>{
+let response = await fetch('../json/radio.json')
+    radios = await response.json();
+
+    const radioList = document.getElementById('radio-list');
+    radioList.innerHTML = '';
+
+    // howler = new Howl({
+    //     src: [songs[i].src],
+    //     volume: songVolume
+    // });
+    
+
+    radios.forEach((radio, index) => {
+        const radioItem = document.createElement('div');
+        radioItem.textContent = `${radio.nombre}`;
+        radioItem.addEventListener('click', () => playRadio(index));
+        radioList.appendChild(radioItem);
+    });
+}
+
 
 function playSong(index){
     if(howler){
@@ -60,8 +82,32 @@ function playSong(index){
     howler = new Howl({
         src: [song.src],
         volume: songVolume,
-        onplay: showCurrentSong(song)
+        onplay: () => showCurrentSong(song)
     });
+
+    howler.play();
+}
+
+function playRadio(index){
+if (howler) {
+        howler.stop();
+    }
+
+    // Si hay otra radio sonando, la paramos también
+    if (currentRadio) {
+        currentRadio.stop();
+    }
+
+    const radio = radios[index];
+
+    currentRadio = new Howl({
+        src: [radio.src],
+        html5: true, // 🔊 necesario para streaming
+        volume: songVolume,
+        onplay: () => showCurrentRadio(radio)
+    });
+
+    currentRadio.play();
 }
 
 function showCurrentSong(song){
@@ -74,12 +120,34 @@ function showCurrentSong(song){
     songName.textContent = song.titulo;
 }
 
+function showCurrentRadio(song){
+    const cover = document.querySelector('.song img');
+    const artistName = document.getElementById('artist-name');
+    const songName = document.getElementById('song-name');
+
+    cover.src = song.cover;
+    artistName.textContent = song.artista;
+    songName.textContent = song.titulo;
+}
+
+
 const pause = document.getElementById('pause');
 const nextSong = document.getElementById('next-song');
 const prevSong = document.getElementById('prev-song');
 
 pause.addEventListener("click", function(){
-    playSong(index);
+    if (!howler) {
+        if (songs.length > 0) {
+            playSong(0);
+        }
+        return;
+    }
+
+    if (howler.playing()) {
+        howler.pause();
+    } else {
+        howler.play();
+    }
 })
 
 
@@ -143,3 +211,4 @@ function animateEqualizer() {
 
 // On Load
 loadSongs();
+loadRadios();
