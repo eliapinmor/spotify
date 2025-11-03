@@ -17,6 +17,7 @@ let songs = [];
 let currentSongIndex = null;
 let radios = [];
 let currentRadio = null;
+let currentRadioIndex = null;
 
 //Loading Songs
 const loadSongs = async () => {
@@ -92,8 +93,7 @@ function playRadio(index){
 if (howler) {
         howler.stop();
     }
-
-    // Si hay otra radio sonando, la paramos también
+    console.log(currentRadio);
     if (currentRadio) {
         currentRadio.stop();
     }
@@ -120,48 +120,92 @@ function showCurrentSong(song){
     songName.textContent = song.titulo;
 }
 
-function showCurrentRadio(song){
+function showCurrentRadio(radio){
     const cover = document.querySelector('.song img');
-    const artistName = document.getElementById('artist-name');
+    const radioName = document.getElementById('artist-name');
     const songName = document.getElementById('song-name');
 
-    cover.src = song.cover;
-    artistName.textContent = song.artista;
-    songName.textContent = song.titulo;
+    cover.src = radio.cover;
+    radioName.textContent = radio.artista;
+    songName.textContent = "";
 }
+
 
 
 const pause = document.getElementById('pause');
 const nextSong = document.getElementById('next-song');
 const prevSong = document.getElementById('prev-song');
 
-pause.addEventListener("click", function(){
-    if (!howler) {
+function getActiveAudio() {
+    if (currentRadio) return currentRadio;
+    if (howler) return howler;
+    return null;
+}
+
+pause.addEventListener("click", function() {
+    const active = getActiveAudio();
+
+    if (!active) {
         if (songs.length > 0) {
             playSong(0);
+        } else if (radios.length > 0) {
+            playRadio(0);
         }
         return;
     }
 
-    if (howler.playing()) {
-        howler.pause();
+    if (active.playing()) {
+        active.pause();
     } else {
-        howler.play();
+        active.play();
     }
-})
+});
 
 
 nextSong.addEventListener("click", () => {
-    if(currentSongIndex === null) return;
-    const nextIndex = (currentSongIndex + 1) % songs.length;
-    playSong(nextIndex);
+    if (currentRadio) {
+        const nextIndex = (currentRadioIndex + 1) % songs.length;
+        playRadio(nextIndex);
+    } else if (currentSongIndex !== null) {
+        const nextIndex = (currentSongIndex + 1) % songs.length;
+        playSong(nextIndex);
+    }
 });
 
 
 prevSong.addEventListener("click", () => {
-    if(currentSongIndex === null) return;
-    const prevIndex = (currentSongIndex - 1 + songs.length) % songs.length;
-    playSong(prevIndex);
+    if (currentRadio) {
+        const prevIndex = (radios.findIndex(r => r === currentRadio._src[0]) - 1 + radios.length) % radios.length;
+        playRadio(prevIndex);
+    } else if (currentSongIndex !== null) {
+        const prevIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+        playSong(prevIndex);
+    }
+});
+
+
+const progressBar = document.getElementById('progress-bar');
+const currentTimeHTML = document.getElementById('current-time');
+const totalTimeHTML = document.getElementById('total-time');
+
+
+function updateProgressBar() {
+    if (!howler.playing()) return;
+
+    const currentTime = howler.seek();
+    const duration = howler.duration();
+
+    progressBar.value = (currentTime / duration) * 100;
+
+
+    currentTimeHTML.textContent = formatTime(currentTime);
+    totalTimeHTML.textContent = formatTime(duration);
+}
+
+progressBar.addEventListener('input', () => {
+    if (!howler) return;
+    const newTime = (progressBar.value / 100) * howler.duration();
+    howler.seek(newTime);
 });
 
 
